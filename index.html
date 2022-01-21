@@ -1,6 +1,6 @@
-<script src="./leaflet.js"></script>
-<link rel="stylesheet" href="./leaflet.css"/>
-<script src="./leaflet.ChineseTmsProviders.js"></script>
+<script src="./leaflet/leaflet.js"></script>
+<link rel="stylesheet" href="./leaflet/leaflet.css"/>
+<script src="./leaflet/leaflet.ChineseTmsProviders.js"></script>
 
 <style>
 // #mapDiv { height: 100%; }
@@ -8,29 +8,48 @@
 </style>
 <div id="mapDiv" class='test'></div>
 <script>
-    var tianditu = L.tileLayer.chinaProvider('TianDiTu.Normal.Map', {
+    var tianditu_vec = L.tileLayer.chinaProvider('TianDiTu.Normal.Map', {
         maxZoom: 18,
         minZoom: 1
     });
-	var tianditu_anno = L.tileLayer.chinaProvider('TianDiTu.Normal.Annotion', {
+	var tianditu_cva = L.tileLayer.chinaProvider('TianDiTu.Normal.Annotion', {
         maxZoom: 18,
         minZoom: 1
     });
+    var tianditu = L.layerGroup([tianditu_vec, tianditu_cva])
 	var osm = L.tileLayer.chinaProvider('OSM.Normal.Map', {
         maxZoom: 18,
         minZoom: 1
     });
-    // we can add multiply layers in here
-    var tiandituLayers = {"TianDiTu": tianditu}
-	var osmLayers = {"OSM": osm}
+
+    // judge the map loaded first
+    var lang = navigator.language;
+    console.log("language is " + lang);
+    var zhs = ["zh-cn", "zh-tw", "zh-hk", "zh-om", "zh-cht", "zh-chs"];
+    if (zhs.indexOf(lang.toLowerCase()) > -1) {
+        default_map = tianditu;
+        default_name = "TianDiTu(default)"
+        other_map = osm;
+        other_name = "OSM"
+    }
+    else {
+        default_map = osm;
+        default_name = "OSM(default)"
+        other_map = tianditu;
+        other_name = "TianDiTu"
+    }
     
+    // display maps
     var map = L.map("mapDiv", {
-        center: [41.80, 123.43],
-        zoom: 7,
-        layers: [tianditu, tianditu_anno],
+        center: [34.3227, 108.5525],
+        zoom: 4,
+        layers: default_map,
         zoomControl: false
     });
-    L.control.layers(tiandituLayers, osmLayers).addTo(map);
+    L.control.layers({
+        [default_name]: default_map, 
+        [other_name]: other_map
+    }).addTo(map);
     L.control.zoom({
         zoomInTitle: 'Zoom in',
         zoomOutTitle: 'Zoom out'
